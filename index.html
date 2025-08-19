@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti, mi amor</title>
+    <meta name="description" content="Un poema especial con efectos visuales">
+    <style>
+        :root {
+            --text-color: #f0f0f0;
+            --background-overlay-color: rgba(0, 0, 0, 0.7);
+            --button-bg-color: #5cb85c;
+            --button-hover-bg-color: #4cae4c;
+            --shining-color-primary: #00bfff;
+            --shining-color-secondary: #fff;
+            --poem-highlight-color: #b3e6ff;
+            --verse-delay: 2s;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Merriweather', serif;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            background: url('https://images.pexels.com/photos/5740673/pexels-photo-5740673.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .container {
+            z-index: 1;
+            max-width: 800px;
+            padding: 3rem;
+            background-color: var(--background-overlay-color);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .text-container {
+            margin: 2rem 0;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .initial-text {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .waiting-text {
+            font-size: 1.6rem;
+            margin-top: 1.5rem;
+            opacity: 0;
+            animation: shine 2s ease-in-out infinite alternate;
+        }
+
+        .poem-line {
+            font-size: 1.5rem;
+            line-height: 1.8em;
+            margin: 0.5em 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            font-style: italic;
+        }
+
+        .poem-line.visible {
+            opacity: 1;
+        }
+
+        .poem-line.highlight {
+            color: var(--poem-highlight-color);
+            text-shadow: 0 0 10px rgba(179, 230, 255, 0.5);
+        }
+
+        .final-message {
+            font-size: 2.2rem;
+            animation: shine 2s ease-in-out infinite alternate;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        @keyframes shine {
+            from {
+                text-shadow: 0 0 8px var(--shining-color-secondary),
+                            0 0 12px var(--shining-color-secondary),
+                            0 0 18px var(--shining-color-primary),
+                            0 0 24px var(--shining-color-primary);
+            }
+            to {
+                text-shadow: 0 0 12px var(--shining-color-secondary),
+                            0 0 18px var(--shining-color-secondary),
+                            0 0 24px var(--shining-color-primary),
+                            0 0 30px var(--shining-color-primary);
+            }
+        }
+
+        .btn {
+            background-color: var(--button-bg-color);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: translateY(-3px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .visible-container {
+            opacity: 1 !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+            .initial-text {
+                font-size: 1.5rem;
+            }
+            .poem-line {
+                font-size: 1.3rem;
+            }
+            .final-message {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <button id="startButton" class="btn">Comenzar</button>
+        
+        <div id="initialContainer" class="text-container hidden">
+            <div id="initialText" class="initial-text"></div>
+            <div id="waitingText" class="waiting-text"></div>
+        </div>
+
+        <div id="poemContainer" class="text-container hidden">
+            <div id="poemText"></div>
+            <button id="finishButton" class="btn hidden">Ver mensaje final</button>
+        </div>
+
+        <div id="finalContainer" class="text-container hidden">
+            <div id="finalMessage" class="final-message"></div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const elements = {
+                startButton: document.getElementById('startButton'),
+                initialContainer: document.getElementById('initialContainer'),
+                initialText: document.getElementById('initialText'),
+                waitingText: document.getElementById('waitingText'),
+                poemContainer: document.getElementById('poemContainer'),
+                poemText: document.getElementById('poemText'),
+                finishButton: document.getElementById('finishButton'),
+                finalContainer: document.getElementById('finalContainer'),
+                finalMessage: document.getElementById('finalMessage')
+            };
+
+            // Contenido textual
+            const content = {
+                initial: "No te vi hoy, pero sé que estás tan bonita que el cielo se pone celoso.",
+                waiting: "Espera...",
+                poem: [
+                    { text: "En la noche, tu luz es la más brillante,", highlight: true },
+                    { text: "más que cualquier estrella en el cielo distante.", highlight: false },
+                    { text: "Tu sonrisa eclipsa a la luna y su reflejo,", highlight: true },
+                    { text: "tu belleza hace ver el universo pequeño.", highlight: false },
+                    { text: "", highlight: false },
+                    { text: "Pero también entre líneas y códigos se esconde un arte,", highlight: true },
+                    { text: "un mundo ilógico.", highlight: false },
+                    { text: "Tus ojos, como variables en constante cambio,", highlight: true },
+                    { text: "resuelven mi algoritmo al hallarte.", highlight: false }
+                ],
+                final: "Ten una bonita noche, te amo :D"
+            };
+
+            // Función para esperar
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            // Función para mostrar texto letra por letra
+            async function typeText(element, text, speed) {
+                element.textContent = '';
+                for (let i = 0; i < text.length; i++) {
+                    element.textContent += text.charAt(i);
+                    await delay(speed);
+                }
+            }
+
+            // Función para mostrar el poema verso por verso
+            async function displayPoem() {
+                for (let i = 0; i < content.poem.length; i++) {
+                    const lineElement = document.createElement('div');
+                    lineElement.className = 'poem-line';
+                    lineElement.textContent = content.poem[i].text;
+                    
+                    if (content.poem[i].highlight) {
+                        lineElement.classList.add('highlight');
+                    }
+
+                    elements.poemText.appendChild(lineElement);
+                    
+                    // Mostrar verso con transición
+                    setTimeout(() => {
+                        lineElement.classList.add('visible');
+                    }, i * 2000); // 2 segundos entre versos
+                    
+                    await delay(100);
+                }
+                
+                // Mostrar botón final después del último verso
+                setTimeout(() => {
+                    elements.finishButton.classList.remove('hidden');
+                }, (content.poem.length - 1) * 2000);
+            }
+
+            // Evento del botón de inicio
+            elements.startButton.addEventListener('click', async () => {
+                // Ocultar botón de inicio
+                elements.startButton.style.opacity = '0';
+                await delay(1000);
+                elements.startButton.classList.add('hidden');
+
+                // Mostrar contenedor inicial
+                elements.initialContainer.classList.remove('hidden');
+                await delay(50);
+                elements.initialContainer.classList.add('visible-container');
+                
+                // Mostrar texto inicial
+                elements.initialText.textContent = content.initial;
+                elements.initialText.style.opacity = '1';
+
+                // Esperar 3 segundos y mostrar "Espera..." dinámicamente
+                await delay(3000);
+                await typeText(elements.waitingText, content.waiting, 100);
+                elements.waitingText.style.opacity = '1';
+
+                // Transición al poema después de 2 segundos más
+                await delay(2000);
+                elements.initialContainer.style.opacity = '0';
+                await delay(1000);
+                elements.initialContainer.classList.add('hidden');
+
+                // Mostrar contenedor del poema
+                elements.poemContainer.classList.remove('hidden');
+                await delay(50);
+                elements.poemContainer.classList.add('visible-container');
+                
+                // Mostrar poema verso por verso
+                await displayPoem();
+            });
+
+            // Evento del botón final
+            elements.finishButton.addEventListener('click', async () => {
+                // Ocultar poema
+                elements.poemContainer.style.opacity = '0';
+                await delay(1000);
+                elements.poemContainer.classList.add('hidden');
+
+                // Mostrar mensaje final
+                elements.finalContainer.classList.remove('hidden');
+                await delay(50);
+                elements.finalContainer.classList.add('visible-container');
+                elements.finalMessage.textContent = content.final;
+                elements.finalMessage.style.opacity = '1';
+            });
+        });
+    </script>
+</body>
+</html>
